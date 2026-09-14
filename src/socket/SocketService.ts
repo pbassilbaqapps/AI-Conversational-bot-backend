@@ -39,7 +39,7 @@ export default class SocketService {
   private handleConnection(socket: Socket) {
     console.log(`Socket connected: ${socket.id}`);
 
-    //this.ordersMcp.connect()
+    this.ordersMcp.connect()
     socket.on("message_in", async (payload: unknown) => {
       try {
 
@@ -59,7 +59,7 @@ export default class SocketService {
         );
 
         // Se llama a la función generarTextoAgents para procesar el mensaje y obtener la respuesta del agente
-        const response = await generarTextoAgents(message, [], session);
+        const response = await generarTextoAgents(message, [this.ordersMcp], session);
 
         // Se envía la respuesta de vuelta al cliente a través del socket
         const mensaje = response?.message || "No se pudo generar una respuesta.";
@@ -70,11 +70,13 @@ export default class SocketService {
       }
     });
 
+    // Este evento es para pruebas y para confirmar que la comunicación vía socket funciona correctamente
     socket.on("test", async (payload: unknown) => {
       console.log("Received test event with payload:", payload);
       socket.emit("test_response", { message: "Test event received successfully!" });
     });
 
+    // Este evento se encarga de limpiar la sesión en Redis cuando el cliente lo solicita
     socket.on("clear_session", async (payload: unknown) => {
       try {
         const {

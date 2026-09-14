@@ -17,7 +17,13 @@ Funcionalidades principales:
 
 ## 2. Como se ejecuta
 
-Primero instala las dependencias:
+Primero instala la imagen de Redis en Docker:
+
+```bash
+npm run redis-start
+```
+
+Luego instala las dependencias:
 
 ```bash
 npm install
@@ -58,6 +64,7 @@ npm run start:compiled
 ## 3. Que hay que tener en cuenta para ejecutarlo
 
 - Este proyecto depende de que un MCP este funcionando. [Link para el proyecto](https://github.com/pbassilbaqapps/AI-Conversational-bot-MCP).
+- Se recomienda instalar Docker Desktop para el manejo de la imagen de Redis.
 - Se recomienda usar la version de Node indicada en `.nvmrc`: `v24.20.0`.
 - El archivo `.env` debe existir y debe incluir `OPENAI_API_KEY`; si no esta definida, la aplicacion falla al iniciar.
 - `OPENAI_MODEL` es opcional. Si no se define, se usa `gpt-4.1-mini`.
@@ -95,6 +102,7 @@ Ejemplo de body para `POST /api/message`:
 
 ```json
 {
-  "message": "Hola, quiero consultar una orden"
+  "message": "Hola, quiero consultar una orden",
+  "sessionId": "1234"
 }
 ```
