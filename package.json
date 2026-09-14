@@ -9,7 +9,8 @@
     "build": "tsc",
     "start:compiled": "node dist/index.js",
     "debug": "node --inspect --import tsx src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "redis-start": "docker compose up -d"
   },
   "keywords": [],
   "author": "",
@@ -22,10 +23,12 @@
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
     "openai": "^7.10.0",
+    "redis": "^6.2.1",
     "socket.io": "^4.7.5",
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@types/redis": "^4.0.10",
     "@types/axios": "^0.9.36",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",

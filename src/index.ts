@@ -2,11 +2,23 @@ import 'dotenv/config';
 import express, { type Request, type Response } from "express";
 import { generarTexto } from "./helpers/openai";
 import SocketService from "./socket/SocketService";
+import { createClient } from 'redis';
 
 // Crea la aplicacion principal de Express y define los puertos de entrada.
 const app = express();
 const SOCKET_PORT = 3001;
 const API_PORT = Number(process.env.PORT) || 3000;
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+
+const redisClient = createClient({
+  url: REDIS_URL,
+});
+redisClient.on("error", (error) => {
+  console.error("Redis error:", error);
+});
+redisClient.on("connect", () => {
+  console.log("Conectado a Redis correctamente.");
+});
 
 // Permite recibir cuerpos JSON en las peticiones HTTP.
 app.use(express.json());
@@ -46,11 +58,21 @@ app.post("/api/message", (_request: Request, response: Response) => {
     });
 });
 
-// Levanta el servidor de Socket.IO para comunicacion en tiempo real.
-const socketService = new SocketService(SOCKET_PORT, '*');
-socketService.start();
+let socketService;
 
-// Inicia el servidor HTTP de Express.
-app.listen(API_PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${API_PORT}`);
-});
+const boostrap = async () => {
+  try {
+    await redisClient.connect();
+
+    socketService = new SocketService(SOCKET_PORT, redisClient, '*');
+    socketService.start();
+
+    app.listen(API_PORT, () => {
+      console.log(`Servidor escuchando en http://localhost:${API_PORT}`);
+    });
+  } catch (error) {
+    console.error("Error al conectar a Redis:", error);
+  }
+};
+
+boostrap();

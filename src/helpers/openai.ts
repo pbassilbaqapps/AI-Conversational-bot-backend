@@ -2,6 +2,7 @@ import "dotenv/config";
 import { Agent, run, MCPServerStreamableHttp } from "@openai/agents";
 import OpenAI from "openai";
 import { alternateBehavior } from "./agents";
+import { RedisSession } from "./RedisSession";
 
 const apiKey = process.env.OPENAI_API_KEY;
 const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
@@ -41,6 +42,7 @@ export async function generarTexto(
 export async function generarTextoAgents(
   prompt: string,
   mcps: MCPServerStreamableHttp[] = [],
+  session: RedisSession
 ): Promise<GeneratedTextAgentsResponse> {
   const agent = new Agent({
     name: "Orders Agent",
@@ -52,10 +54,13 @@ export async function generarTextoAgents(
   const result = await run(
     agent,
     prompt,
+    {
+      session,
+    }
   );
 
   return {
-    message: JSON.stringify(result.finalOutput),
+    message: result?.finalOutput || "No se pudo generar una respuesta.",
     model,
   };
 }
