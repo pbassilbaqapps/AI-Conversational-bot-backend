@@ -1,8 +1,10 @@
 import "dotenv/config";
-import { Agent, run, MCPServerStreamableHttp } from "@openai/agents";
+import { Agent, run, MCPServerStreamableHttp, handoff } from "@openai/agents";
 import OpenAI from "openai";
-import { alternateBehavior } from "./agents";
+import { masterAgentBehavior } from "./agents";
 import { RedisSession } from "./RedisSession";
+import { UsersHandoff } from "../handoffs/users.handoff";
+import { OrdersHandoff } from "../handoffs/orders.handoff";
 
 const apiKey = process.env.OPENAI_API_KEY;
 const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
@@ -41,14 +43,18 @@ export async function generarTexto(
 /** Genera una respuesta de texto a partir de un prompt. */
 export async function generarTextoAgents(
   prompt: string,
-  mcps: MCPServerStreamableHttp[] = [],
+  //mcps: MCPServerStreamableHttp[] = [],
   session: RedisSession
 ): Promise<GeneratedTextAgentsResponse> {
   const agent = new Agent({
     name: "Orders Agent",
-    instructions: alternateBehavior,
-    mcpServers: mcps,
+    instructions: masterAgentBehavior,
+    //mcpServers: mcps,
     model,
+    handoffs: [
+      handoff(UsersHandoff),
+      handoff(OrdersHandoff)
+    ]
   });
 
   const result = await run(

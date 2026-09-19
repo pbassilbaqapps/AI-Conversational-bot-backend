@@ -1,7 +1,6 @@
 import http from "http";
 import { Server, Socket } from "socket.io";
 import { generarTextoAgents } from "../helpers/openai";
-import { AgentResponse } from "../helpers/agents";
 import { MCPServerStreamableHttp } from "@openai/agents";
 import { RedisClientType } from "redis";
 import { RedisSession } from "../helpers/RedisSession";
@@ -12,7 +11,6 @@ export default class SocketService {
   private port: number;
   private redisSession: RedisClientType;
   private corsOrigin?: string | string[];
-  private ordersMcp: MCPServerStreamableHttp;
 
   constructor(port: number, redisSession: RedisClientType, corsOrigin?: string | string[]) {
     this.port = port;
@@ -26,20 +24,12 @@ export default class SocketService {
       },
     });
 
-    this.ordersMcp =
-      new MCPServerStreamableHttp({
-        url: "http://localhost:3002/mcp",
-
-        name: "Orders MCP",
-      });
-
     this.io.on("connection", (socket: Socket) => this.handleConnection(socket));
   }
 
   private handleConnection(socket: Socket) {
     console.log(`Socket connected: ${socket.id}`);
 
-    this.ordersMcp.connect()
     socket.on("message_in", async (payload: unknown) => {
       try {
 
@@ -59,7 +49,7 @@ export default class SocketService {
         );
 
         // Se llama a la función generarTextoAgents para procesar el mensaje y obtener la respuesta del agente
-        const response = await generarTextoAgents(message, [this.ordersMcp], session);
+        const response = await generarTextoAgents(message, session);
 
         // Se envía la respuesta de vuelta al cliente a través del socket
         const mensaje = response?.message || "No se pudo generar una respuesta.";

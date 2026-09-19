@@ -3,6 +3,7 @@ import express, { type Request, type Response } from "express";
 import { generarTexto } from "./helpers/openai";
 import SocketService from "./socket/SocketService";
 import { createClient } from 'redis';
+import { olimpicaMCP } from './MCPs/OlimpicaMCP';
 
 // Crea la aplicacion principal de Express y define los puertos de entrada.
 const app = express();
@@ -63,6 +64,7 @@ let socketService;
 const boostrap = async () => {
   try {
     await redisClient.connect();
+    await olimpicaMCP.connect();
 
     socketService = new SocketService(SOCKET_PORT, redisClient, '*');
     socketService.start();
@@ -71,7 +73,7 @@ const boostrap = async () => {
       console.log(`Servidor escuchando en http://localhost:${API_PORT}`);
     });
   } catch (error) {
-    console.error("Error al conectar a Redis:", error);
+    console.error("Error al inicializar el backend:", error);
   }
 };
 
