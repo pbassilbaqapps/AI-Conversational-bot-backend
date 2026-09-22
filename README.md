@@ -10,8 +10,7 @@ Funcionalidades principales:
 
 - Servidor Express en el puerto configurado por `PORT` o, por defecto, `3000`.
 - Endpoint `GET /` para verificar que el servidor esta activo.
-- Endpoint `GET /api/hello` para una respuesta de prueba.
-- Endpoint `POST /api/message` para enviar un mensaje y obtener una respuesta generada por OpenAI.
+- Endpoint `GET /api/health` para una respuesta de prueba.
 - Servidor Socket.IO en el puerto `3001`.
 - Conexion a un servidor MCP de ordenes en `http://localhost:3002/mcp`.
 
@@ -84,7 +83,12 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3001");
 
-socket.emit("message_in", "Hola, quiero consultar una orden");
+const messsage_object = {
+    "message": "Hola!",
+    "sessionId": "12345"
+}
+
+socket.emit("message_in", JSON.stringify(messsage_object));
 
 socket.on("messages_updated", (message) => {
   console.log(message);
@@ -94,15 +98,4 @@ socket.on("messages_updated", (message) => {
 ### Como usar el API Rest
 
 - `PORT` es opcional. Si no se define, Express se ejecuta en `http://localhost:3000`.
-- El endpoint `GET /` permite verificar que el servidor esta activo.
-- El endpoint `GET /api/hello` devuelve una respuesta de prueba.
-- El endpoint `POST /api/message` espera un body JSON con la propiedad `message`.
-
-Ejemplo de body para `POST /api/message`:
-
-```json
-{
-  "message": "Hola, quiero consultar una orden",
-  "sessionId": "1234"
-}
-```
+- El endpoint `GET /api/health` devuelve una respuesta de prueba.

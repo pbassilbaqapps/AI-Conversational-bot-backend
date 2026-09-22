@@ -12,7 +12,7 @@ const API_PORT = Number(process.env.PORT) || 3000;
 app.use(express.json());
 
 // Endpoint de prueba para confirmar que la API REST responde correctamente.
-app.get("/api/hello", (_request: Request, response: Response) => {
+app.get("/api/health", (_request: Request, response: Response) => {
   response.json({
     ok: true,
     message: "Hola desde Express.js y TypeScript",
