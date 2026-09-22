@@ -1,22 +1,16 @@
 import http from "http";
 import { Server, Socket } from "socket.io";
-import { generarTextoAgents } from "../helpers/openai";
-import { MCPServerStreamableHttp } from "@openai/agents";
-import { RedisClientType } from "redis";
-import { RedisSession } from "../helpers/RedisSession";
+import { AgentLogicService } from "./AgentLogic";
 
 export default class SocketService {
   private socketServer: http.Server;
   private io: Server;
   private port: number;
-  private redisSession: RedisClientType;
   private corsOrigin?: string | string[];
 
-  constructor(port: number, redisSession: RedisClientType, corsOrigin?: string | string[]) {
+  constructor(port: number, corsOrigin?: string | string[]) {
     this.port = port;
     this.corsOrigin = corsOrigin;
-    this.redisSession = redisSession;
-
     this.socketServer = http.createServer();
     this.io = new Server(this.socketServer, {
       cors: {
@@ -32,7 +26,6 @@ export default class SocketService {
 
     socket.on("message_in", async (payload: unknown) => {
       try {
-
         // Primero extraemos el mensaje y el sessionId del payload recibido
         const {
           message,
@@ -42,19 +35,13 @@ export default class SocketService {
           sessionId: string;
         };
 
-        // Se crea una nueva instancia de RedisSession para manejar la sesión del usuario
-        const session = new RedisSession(
-          sessionId,
-          this.redisSession,
-        );
-
         // Se llama a la función generarTextoAgents para procesar el mensaje y obtener la respuesta del agente
-        const response = await generarTextoAgents(message, session);
-
+        const response = await AgentLogicService.sendMessage(message, sessionId);
         // Se envía la respuesta de vuelta al cliente a través del socket
         const mensaje = response?.message || "No se pudo generar una respuesta.";
         socket.emit("messages_updated", mensaje);
       } catch (error) {
+        console.log(error)
         socket.emit("messages_updated", "Error al procesar el mensaje.");
         console.error("Error handling message_in:", error);
       }
@@ -75,12 +62,7 @@ export default class SocketService {
           sessionId: string;
         };
 
-        const session = new RedisSession(
-          sessionId,
-          this.redisSession,
-        );
-
-        session.clearSession().catch((err) => console.error("Error clearing session on disconnect:", err));
+        AgentLogicService.clearSession(sessionId)
 
         socket.emit("messages_updated", `Session ID ${sessionId} desconectada.`);
         console.log(`Socket disconnected: ${socket.id}`);
@@ -113,7 +95,7 @@ export default class SocketService {
 
   stop(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.redisSession.quit().catch((err) => console.error("Error closing Redis connection:", err));
+      AgentLogicService.quit()
       this.io.close(() => {
         this.socketServer.close((err) => (err ? reject(err) : resolve()));
       });

@@ -1,10 +1,10 @@
 import { Agent } from "@openai/agents";
-import { userAgentBehavior } from "../helpers/agents";
-import { olimpicaMCP } from "../MCPs/OlimpicaMCP";
+import { userAgentBehavior } from "../constants/agents";
+import { olimpicaMCPClient } from "../MCPs/OlimpicaMCPClient";
 
 export const UsersHandoff = new Agent({
-  name: "Usrs Agent",
+  name: "Users Agent",
   instructions: userAgentBehavior,
-  mcpServers: [olimpicaMCP.toMCP()],
+  mcpServers: [olimpicaMCPClient.toMCP()],
   model: 'gpt-4.1-mini',
 });

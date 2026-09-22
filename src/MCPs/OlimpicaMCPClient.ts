@@ -1,6 +1,6 @@
 import { MCPServerStreamableHttp } from "@openai/agents";
 
-class OlimpicaMCP {
+class OlimpicaMCPClient {
   private MCP: MCPServerStreamableHttp;
   private connectPromise?: Promise<void>;
   private isConnected = false;
@@ -8,7 +8,6 @@ class OlimpicaMCP {
   constructor() {
     this.MCP = new MCPServerStreamableHttp({
       url: "http://localhost:3002/mcp",
-
       name: "Orders MCP",
     });
   }
@@ -42,4 +41,4 @@ class OlimpicaMCP {
   }
 }
 
-export const olimpicaMCP = new OlimpicaMCP()
+export const olimpicaMCPClient = new OlimpicaMCPClient()
