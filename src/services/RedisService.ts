@@ -5,7 +5,7 @@ import type {
 
 import type { RedisClientType } from "redis";
 
-export class RedisSession implements Session {
+export class RedisService implements Session {
   constructor(
     private readonly sessionId: string,
     private readonly redis: RedisClientType,

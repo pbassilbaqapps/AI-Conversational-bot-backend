@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Agent, run, handoff } from "@openai/agents";
 import { masterAgentBehavior } from "../constants/agents";
-import { RedisSession } from "./RedisSession";
+import { RedisService } from "./RedisService";
 import { UsersHandoff } from "../handoffs/users.handoff";
 import { OrdersHandoff } from "../handoffs/orders.handoff";
 import { createClient, RedisClientType } from "redis";
@@ -52,8 +52,8 @@ class AgentLogic {
   }
 
   async sendMessage(prompt: string, sessionId: string): Promise<AgentResponse> {
-    // Se crea una nueva instancia de RedisSession para manejar la sesión del usuario
-    const redisSession: RedisSession = new RedisSession(
+    // Se crea una nueva instancia de RedisService para manejar la sesión del usuario
+    const redisService: RedisService = new RedisService(
       sessionId,
       this.redisClient,
     );
@@ -62,7 +62,7 @@ class AgentLogic {
       this.agent,
       prompt,
       {
-        session: redisSession,
+        session: redisService,
       }
     );
 
@@ -74,7 +74,7 @@ class AgentLogic {
 
   clearSession(sessionId: string) {
     try {
-      const session = new RedisSession(
+      const session = new RedisService(
         sessionId,
         this.redisClient,
       );
