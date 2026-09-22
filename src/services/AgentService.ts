@@ -14,12 +14,12 @@ if (!apiKey) {
   throw new Error("Falta definir OPENAI_API_KEY en el archivo .env");
 }
 
-type AgentResponse = {
+type AgentServiceResponse = {
   message: string;
   model?: string;
 };
 
-class AgentLogic {
+class AgentService {
   private agent: Agent;
   private redisClient: RedisClientType;
   
@@ -51,7 +51,7 @@ class AgentLogic {
     return this.agent;
   }
 
-  async sendMessage(prompt: string, sessionId: string): Promise<AgentResponse> {
+  async sendMessage(prompt: string, sessionId: string): Promise<AgentServiceResponse> {
     // Se crea una nueva instancia de RedisService para manejar la sesión del usuario
     const redisService: RedisService = new RedisService(
       sessionId,
@@ -95,4 +95,4 @@ class AgentLogic {
 }
 
 
-export const AgentLogicService = new AgentLogic()
+export const agentService = new AgentService()

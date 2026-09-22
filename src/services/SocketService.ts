@@ -1,6 +1,6 @@
 import http from "http";
 import { Server, Socket } from "socket.io";
-import { AgentLogicService } from "./AgentLogic";
+import { agentService } from "./AgentService"
 
 export default class SocketService {
   private socketServer: http.Server;
@@ -36,7 +36,7 @@ export default class SocketService {
         };
 
         // Se llama a la función generarTextoAgents para procesar el mensaje y obtener la respuesta del agente
-        const response = await AgentLogicService.sendMessage(message, sessionId);
+        const response = await agentService.sendMessage(message, sessionId);
         // Se envía la respuesta de vuelta al cliente a través del socket
         const mensaje = response?.message || "No se pudo generar una respuesta.";
         socket.emit("messages_updated", mensaje);
@@ -62,7 +62,7 @@ export default class SocketService {
           sessionId: string;
         };
 
-        AgentLogicService.clearSession(sessionId)
+        agentService.clearSession(sessionId)
 
         socket.emit("messages_updated", `Session ID ${sessionId} desconectada.`);
         console.log(`Socket disconnected: ${socket.id}`);
@@ -95,7 +95,7 @@ export default class SocketService {
 
   stop(): Promise<void> {
     return new Promise((resolve, reject) => {
-      AgentLogicService.quit()
+      agentService.quit()
       this.io.close(() => {
         this.socketServer.close((err) => (err ? reject(err) : resolve()));
       });
